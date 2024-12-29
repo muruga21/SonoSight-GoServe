@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -82,7 +83,11 @@ func valuesGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// MongoDB Atlas connection URI (replace with your connection string)
-	clientOptions := options.Client().ApplyURI("mongodb+srv://aswathcm29:aswathcm29@connecto.twkskak.mongodb.net/")
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		log.Fatal("MONGO_URI is not set in env")
+	}
+	clientOptions := options.Client().ApplyURI(mongoURI)
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -99,6 +104,12 @@ func main() {
 
 	fmt.Println("Connected to MongoDB!")
 
+	host := os.Getenv("SERVER_HOST")
+	port := os.Getenv("SERVER_PORT")
+	if host == "" || port == "" {
+		log.Fatal("SERVER_HOST or SERVER_PORT not set in .env file")
+	}
+
 	// Get collection handle
 	collection = client.Database("testdb").Collection("values")
 
@@ -113,7 +124,7 @@ func main() {
 		}
 	})
 
-	// Start the server
-	fmt.Println("Server running on http://192.168.4.136:8081")
-	log.Fatal(http.ListenAndServe("192.168.4.136:8081", nil))
+	serverAddress := fmt.Sprintf("%s:%s", host, port)
+	fmt.Printf("Server running on http://%s\n", serverAddress)
+	log.Fatal(http.ListenAndServe(serverAddress, nil))
 }
