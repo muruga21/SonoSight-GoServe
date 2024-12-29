@@ -126,5 +126,5 @@ func main() {
 
 	serverAddress := fmt.Sprintf("%s:%s", host, port)
 	fmt.Printf("Server running on http://%s\n", serverAddress)
-	log.Fatal(http.ListenAndServe(serverAddress, nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
